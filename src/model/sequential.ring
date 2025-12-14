@@ -91,13 +91,16 @@ class Sequential
         next
         see "Done." + nl
 
-	 # --- Model Summary ---
+	 # --- Model Summary (Colorful Version) ---
 
     func summary
+        # Ensure console colors are available (usually loaded by ringml.ring)
+        # If not, this might throw error, but we assume environment is set.
+        
         see nl
-        see "_________________________________________________________________" + nl
-        see "Layer (Type)                 Output Shape              Param #   " + nl
-        see "=================================================================" + nl
+        cc_print(CC_FG_CYAN,  "_________________________________________________________________" + nl)
+        cc_print(CC_FG_WHITE, pad("Layer (Type)", 29) + pad("Output Shape", 26) + "Param #" + nl)
+        cc_print(CC_FG_CYAN,  "=================================================================" + nl)
         
         nTotalParams = 0
         nTrainableParams = 0
@@ -111,18 +114,12 @@ class Sequential
             
             # --- Logic to extract info ---
             if cName = "dense"
-                # Params = (Inputs * Neurons) + Bias
                 nW = oLayer.nInputSize * oLayer.nNeurons
                 nB = oLayer.nNeurons
                 nParams = nW + nB
-                
-                # Shape is (None, Neurons)
                 cOutputShape = "(None, " + oLayer.nNeurons + ")"
                 cLastOutputShape = cOutputShape
-                
             else
-                # Activation/Dropout/Softmax have 0 params
-                # They maintain the previous output shape
                 nParams = 0
                 cOutputShape = cLastOutputShape 
             ok
@@ -136,19 +133,41 @@ class Sequential
                 nNonTrainableParams += nParams
             ok
             
-            # --- Formatting ---
+            # --- Colorful Printing ---
             cCol1 = pad(cName, 29)
             cCol2 = pad(cOutputShape, 26)
             cCol3 = "" + nParams
             
-            see cCol1 + cCol2 + cCol3 + nl
-            see "_________________________________________________________________" + nl
+            # Name in Yellow
+            cc_print(CC_FG_YELLOW, cCol1)
+            
+            # Shape in Cyan
+            cc_print(CC_FG_CYAN,   cCol2)
+            
+            # Params in Green
+            cc_print(CC_FG_GREEN,  cCol3 + nl)
+            
+            # Separator in Dark Gray (Subtle)
+            cc_print(CC_FG_DARK_GRAY, "_________________________________________________________________" + nl)
         next
         
-        see "Total params:         " + nTotalParams + nl
-        see "Trainable params:     " + nTrainableParams + nl
-        see "Non-trainable params: " + nNonTrainableParams + nl
-        see "_________________________________________________________________" + nl + nl
+        # --- Footer ---
+        see nl
+        cc_print(CC_FG_WHITE, "Total params:         ")
+        cc_print(CC_FG_CYAN,  "" + nTotalParams + nl)
+        
+        cc_print(CC_FG_WHITE, "Trainable params:     ")
+        cc_print(CC_FG_GREEN, "" + nTrainableParams + nl)
+        
+        cc_print(CC_FG_WHITE, "Non-trainable params: ")
+        
+        if nNonTrainableParams > 0
+            cc_print(CC_FG_RED, "" + nNonTrainableParams + nl)
+        else
+            cc_print(CC_FG_GRAY, "0" + nl)
+        ok
+        
+        cc_print(CC_FG_CYAN,  "_________________________________________________________________" + nl + nl)
 
     private
     

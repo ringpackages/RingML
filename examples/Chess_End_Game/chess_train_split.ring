@@ -66,6 +66,9 @@ criterion = new CrossEntropyLoss
 optimizer = new Adam(0.002) 
 nEpochs   = 20
 
+# --- SETUP VISUALIZER ---
+viz = new TrainingVisualizer(nEpochs, trainLoader.nBatches)
+
 see "Starting Training..." + nl
 tTotal = clock()
 
@@ -88,6 +91,14 @@ for epoch = 1 to nEpochs
         model.backward(grad)
         
         for layer in model.getLayers() optimizer.update(layer) next
+        
+        # --- UPDATE VISUALIZER (Every 5 batches to be smooth) ---
+        if b % 5 = 0
+            # Calculate rough accuracy for display (optional, or just pass 0)
+            # Here we just pass 0 for batch acc to save speed, or calculate it if fast enough.
+            # Passing 0 for batch accuracy, focusing on Loss color.
+            viz.update(epoch, b, loss, 0)
+        ok
     next
     
     avgTrainLoss = trainLoss / trainLoader.nBatches
@@ -121,9 +132,12 @@ for epoch = 1 to nEpochs
     next
     
     accuracy = (correct / total) * 100
-    see "Epoch " + epoch  + "/" + nEpochs + " | Loss: " + avgTrainLoss + " | Val Acc: " + accuracy + "%" + nl
-    callgc()
-    if epoch % 5 = 0 see "." ok
+    # see "Epoch " + epoch  + "/" + nEpochs + " | Loss: " + avgTrainLoss + " | Val Acc: " + accuracy + "%" + nl
+    
+    # --- FINISH EPOCH VISUALIZATION ---
+    viz.finishEpoch(epoch, avgTrainLoss, accuracy)
+
+    if epoch % 5 = 0 callgc() ok
 next
 
 see "Total Time: " + ((clock()-tTotal)/clockspersecond()) + "s" + nl

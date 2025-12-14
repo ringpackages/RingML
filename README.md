@@ -118,6 +118,20 @@ model.add(new Softmax)
 # View architecture
 model.summary()
 ```
+### 2.2 Freezing a layer
+```ring
+# freeze layer
+model = new Sequential
+l1 = new Dense(6, 32)
+l1.freeze()  # freeze first layer
+model.add(l1)
+model.add(new Tanh)
+model.add(new Dropout(0.2))
+model.add(new Dense(32, 1))
+model.add(new Softmax)
+
+model.summary()
+```
 
 ### 3. Training with Adam
 The training loop handles Forward pass, Backward pass (Backprop), and Optimization.

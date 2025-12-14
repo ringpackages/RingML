@@ -24,11 +24,11 @@ cFile = "data/chess.csv"
 if !fexists(cFile) raise("File missing") ok
 
 see "Reading CSV..." + nl
-aRawData = CSV2List( read(cFile) )
-if len(aRawData) > 0 del(aRawData, 1) ok 
+aRawsData = CSV2List( read(cFile) )
+if len(aRawsData) > 0 del(aRawsData, 1) ok 
 
 # 2. Setup Dataset & Loader
-dataset = new ChessDataset(aRawData)
+dataset = new ChessDataset(aRawsData)
 batch_size = 256 
 loader = new DataLoader(dataset, batch_size)
 
@@ -61,6 +61,9 @@ criterion = new CrossEntropyLoss
 optimizer = new Adam(0.01) 
 nEpochs   = 50 # Increased epochs for better results
 
+# --- SETUP VISUALIZER ---
+viz = new TrainingVisualizer(nEpochs, loader.nBatches)
+
 see "Starting Training..." + nl
 tTotal = clock()
 
@@ -87,13 +90,24 @@ for epoch = 1 to nEpochs
         # Optimizer Step
         for layer in model.getLayers() optimizer.update(layer) next
         
-        if b % 50 = 0 callgc() ok
-        if b % 10 = 0 see "." ok
+        # --- UPDATE VISUALIZER (Every 5 batches to be smooth) ---
+        if b % 5 = 0
+            # Calculate rough accuracy for display (optional, or just pass 0)
+            # Here we just pass 0 for batch acc to save speed, or calculate it if fast enough.
+            # Passing 0 for batch accuracy, focusing on Loss color.
+            viz.update(epoch, b, loss, 0)
+        ok
     next
     
     avgLoss = epochLoss / loader.nBatches
     
-    see "Epoch " + epoch + "/" + nEpochs + " | Loss: " + avgLoss + nl
+    # see "Epoch " + epoch + "/" + nEpochs + " | Loss: " + avgLoss + nl
+    
+    # --- FINISH EPOCH VISUALIZATION ---
+    viz.finishEpoch(epoch, avgLoss, 0)
+    
+    
+    if epoch % 5 = 0 callgc() ok
 next
 
 see "Training Time: " + ((clock()-tTotal)/clockspersecond()) + "s" + nl

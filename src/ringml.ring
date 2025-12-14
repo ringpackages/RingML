@@ -1,11 +1,13 @@
 # File: src/ringml.ring
 # Description: Main entry point
 
+load "consolecolors.ring"
 load "fastpro.ring"
 load "core/tensor.ring"
 load "utils/serializer.ring"
 load "data/dataset.ring"
 load "data/datasplitter.ring"
+load "utils/visualizer.ring"
 load "layers/layer.ring"
 load "layers/dense.ring"
 load "layers/activation.ring"

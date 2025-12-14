@@ -15,25 +15,25 @@ cFile = "data/mnist_test.csv" # Using the smaller test set for quick demo
 if !fexists(cFile) raise("File missing: " + cFile) ok
 
 see "Reading CSV (This might take a moment)..." + nl
-aRawData = CSV2List( read(cFile) )
+aRawsData = CSV2List( read(cFile) )
 
 # --- FIX: Remove Header if it exists ---
 # Check if first cell is "label" (string) instead of a number
-if len(aRawData) > 0 
-    firstCell = aRawData[1][1]
+if len(aRawsData) > 0 
+    firstCell = aRawsData[1][1]
     # Simple check: if it looks like "label", remove it.
     # Or just unconditionally remove first row if you are sure.
     if isString(firstCell) and lower(trim(firstCell)) = "label"
-        del(aRawData, 1)
+        del(aRawsData, 1)
         see "Header removed." + nl
     ok
 ok
 
-nTotal = len(aRawData)
+nTotal = len(aRawsData)
 see "Loaded " + nTotal + " images." + nl
 
 # 2. Setup Dataset & Loader
-dataset = new MnistDataset(aRawData)
+dataset = new MnistDataset(aRawsData)
 batch_size = 256
 loader = new DataLoader(dataset, batch_size)
 
@@ -57,7 +57,10 @@ model.summary()
 # 4. Train
 criterion = new CrossEntropyLoss
 optimizer = new Adam(0.001) # Standard LR for Adam
-nEpochs   = 50 # MNIST learns fast
+nEpochs   = 5 # MNIST learns fast
+
+# --- SETUP VISUALIZER ---
+viz = new TrainingVisualizer(nEpochs, loader.nBatches)
 
 see "Starting Training..." + nl
 tTotal = clock()
@@ -83,12 +86,20 @@ for epoch = 1 to nEpochs
         
         if b % 10 = 0 callgc() ok
         
-        # Print dots to show life
-        if b % 20 = 0 see "." ok
+        # --- UPDATE VISUALIZER (Every 5 batches to be smooth) ---
+        if b % 5 = 0
+            # Calculate rough accuracy for display (optional, or just pass 0)
+            # Here we just pass 0 for batch acc to save speed, or calculate it if fast enough.
+            # Passing 0 for batch accuracy, focusing on Loss color.
+            viz.update(epoch, b, loss, 0)
+        ok
     next
     
     avgLoss = epochLoss / loader.nBatches
-    see nl + "Epoch " + epoch + " Avg Loss: " + avgLoss + nl
+    
+    # see nl + "Epoch " + epoch + " Avg Loss: " + avgLoss + nl
+
+    viz.finishEpoch(epoch, avgLoss, 0)
 next
 
 see "Total Time: " + ((clock()-tTotal)/clockspersecond()) + "s" + nl
