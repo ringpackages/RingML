@@ -20,4 +20,4 @@ load "optim/sgd.ring"
 load "optim/adam.ring"         
 
 func RingML_Info
-    see "RingML Library v1.0.5 - Adam Optimizer Added" + nl
+    see "RingML Library v1.0.6 - Adam Optimizer Added" + nl
