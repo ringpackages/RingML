@@ -15,17 +15,17 @@ aPackageInfo = [
 	],
 	:libs = 	[
 		[
-			:name = "stdlib.ring",
+			:name = "stdlib",
 			:version = "1.0.22",
 			:providerusername = ""
 		],
 		[
-			:name = "consolecolors.ring",
+			:name = "consolecolors",
 			:version = "1.0.7",
 			:providerusername = ""
 		],
 		[
-			:name = "fastpro.ring",
+			:name = "fastpro",
 			:version = "1.0.8",
 			:providerusername = ""
 		]
